@@ -139,6 +139,7 @@ async function loadTemperature() {
     }));
     if (!rows.length) throw new Error("The extracted temperature CSV is empty");
     window.temperatureRows = rows;
+    drawChart(window.activeRegion || "western_na");
     return true;
   } catch (error) {
     window.temperatureRows = null;
