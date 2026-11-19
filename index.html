@@ -30,19 +30,6 @@
     .kicker, .eyebrow { color: #347080; font: 700 11px/1.4 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
     h1 { max-width: 830px; margin: 18px auto; font-size: clamp(42px, 7vw, 80px); font-weight: 500; line-height: .98; letter-spacing: -.04em; }
     .dek { max-width: 680px; margin: 22px auto 0; color: #4d626b; font-size: 20px; line-height: 1.5; }
-    .status-note, .live-note, .missing-note {
-      display: inline-block; margin-top: 28px; padding: 9px 13px;
-      border-radius: 3px; font: 700 10px/1.3 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase;
-    }
-    .status-note {
-      border: 1px solid var(--line); color: var(--muted); background: #fffdf8;
-    }
-    .live-note {
-      border: 1px solid #b4d0c0; color: #315e49; background: #eef8f1;
-    }
-    .missing-note {
-      border: 1px solid #d9b7ad; color: #815447; background: #fff5f1;
-    }
     .story-layout {
       display: grid; grid-template-columns: minmax(280px, 40%) minmax(440px, 60%);
       gap: clamp(24px, 5vw, 76px); max-width: 1500px; margin: 0 auto;
@@ -116,7 +103,6 @@
     <div class="kicker">A guided look at seasonal warming</div>
     <h1>Is the whole world warming equally?</h1>
     <p class="dek">How might warming change the feel of winter, spring, summer, and fall? Follow the globe across four regions and compare each future season with its historical climate.</p>
-    <div id="data-status" class="status-note">Loading data…</div>
   </section>
 
   <main class="story-layout">

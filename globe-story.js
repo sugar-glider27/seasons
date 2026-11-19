@@ -55,15 +55,11 @@ function drawChart(regionId) {
   const margin = { top: 34, right: 14, bottom: 58, left: 50 };
   const rows = window.temperatureRows.filter(d => d.region === regionId);
   if (!rows.length) {
-    d3.select("#data-status").text("REGION DATA MISSING · RUN THE EXTRACTION NOTEBOOK")
-      .classed("live-note", false).classed("missing-note", true);
     svg.append("text").attr("class", "chart-title").attr("text-anchor", "middle")
       .attr("x", 210).attr("y", 155).text("Run the notebook to add this region");
     d3.select("#chart-caption").text("Regional values will appear after the updated extraction runs.");
     return;
   }
-  d3.select("#data-status").text("CMIP6 EXTRACTED · REGIONAL DATA")
-    .classed("live-note", true).classed("missing-note", false);
   const scenarios = ["SSP2-4.5", "SSP5-8.5"];
   const seasons = [
     { name: "Winter", abbreviation: "DJF", months: [12, 1, 2] },
@@ -132,7 +128,6 @@ function drawChart(regionId) {
 }
 
 async function loadTemperature() {
-  const status = d3.select("#data-status");
   try {
     const response = await fetch("data/temperature_seasonality.csv", { cache: "no-store" });
     if (!response.ok) throw new Error("No extracted temperature CSV yet");
@@ -144,13 +139,9 @@ async function loadTemperature() {
     }));
     if (!rows.length) throw new Error("The extracted temperature CSV is empty");
     window.temperatureRows = rows;
-    status.text("CMIP6 EXTRACTED · REGIONAL DATA");
-    status.classed("status-note", false).classed("live-note", true);
     return true;
   } catch (error) {
     window.temperatureRows = null;
-    status.text("CMIP6 DATA NOT FOUND · RUN THE EXTRACTION NOTEBOOK");
-    status.classed("status-note", false).classed("missing-note", true);
     const svg = d3.select("#chart");
     svg.selectAll("*").remove();
     svg.append("text").attr("class", "chart-title").attr("text-anchor", "middle")
