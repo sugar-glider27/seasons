@@ -24,9 +24,16 @@ function drawGlobe() {
 
 function turnTo(regionId, activeStep) {
   if (!regions[regionId]) return;
+  const regionChanged = window.activeRegion !== regionId;
+  const stepChanged = activeStep && window.activeStoryStep !== activeStep;
+  if (!regionChanged && !stepChanged) return;
   window.activeRegion = regionId;
-  if (activeStep) d3.selectAll(".step").classed("is-active", function() { return this === activeStep; });
+  if (activeStep) {
+    window.activeStoryStep = activeStep;
+    d3.selectAll(".step").classed("is-active", function() { return this === activeStep; });
+  }
   d3.select("#region-name").text(regions[regionId].label);
+  if (!regionChanged) return;
   const [lon, lat] = regions[regionId].center;
   const start = globeProjection.rotate();
   const target = [-lon, -lat, 0];
@@ -147,9 +154,29 @@ d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json").then(world 
   drawGlobe();
 }).catch(() => drawGlobe());
 
-loadTemperature().then(() => turnTo("western_na", document.querySelector(".step")));
-const observer = new IntersectionObserver(entries => {
-  const active = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-  if (active) turnTo(active.target.dataset.region, active.target);
-}, { rootMargin: "-30% 0px -38% 0px", threshold: [0, .2, .5, .8] });
-document.querySelectorAll(".step").forEach(step => observer.observe(step));
+const storySteps = Array.from(document.querySelectorAll(".step"));
+let storySyncPending = false;
+
+function syncStoryToView() {
+  const focusY = window.innerHeight * .5;
+  const active = storySteps.map(step => {
+    const rect = step.getBoundingClientRect();
+    return { step, rect, centerY: (rect.top + rect.bottom) / 2 };
+  }).filter(item => item.rect.bottom > 0 && item.rect.top < window.innerHeight)
+    .sort((a, b) => Math.abs(a.centerY - focusY) - Math.abs(b.centerY - focusY))[0];
+  if (active) turnTo(active.step.dataset.region, active.step);
+}
+
+function scheduleStorySync() {
+  if (storySyncPending) return;
+  storySyncPending = true;
+  requestAnimationFrame(() => {
+    storySyncPending = false;
+    syncStoryToView();
+  });
+}
+
+window.addEventListener("scroll", scheduleStorySync, { passive: true });
+window.addEventListener("resize", scheduleStorySync);
+scheduleStorySync();
+loadTemperature().then(syncStoryToView);
