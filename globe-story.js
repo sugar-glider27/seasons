@@ -1,7 +1,8 @@
 const regions = {
   western_na: { label: "Western North America", center: [-120, 38] },
   south_asia: { label: "South Asia", center: [78, 20] },
-  sahel: { label: "Sahel", center: [5, 15] }
+  sahel: { label: "Sahel", center: [5, 15] },
+  central_europe: { label: "Central Europe", center: [15, 50] }
 };
 const colors = { "SSP2-4.5": "#287d9b", "SSP5-8.5": "#cb7046" };
 const globeSvg = d3.select("#globe");
@@ -53,6 +54,16 @@ function drawChart(regionId) {
   const width = 420, height = 320;
   const margin = { top: 34, right: 14, bottom: 58, left: 50 };
   const rows = window.temperatureRows.filter(d => d.region === regionId);
+  if (!rows.length) {
+    d3.select("#data-status").text("REGION DATA MISSING · RUN THE EXTRACTION NOTEBOOK")
+      .classed("live-note", false).classed("missing-note", true);
+    svg.append("text").attr("class", "chart-title").attr("text-anchor", "middle")
+      .attr("x", 210).attr("y", 155).text("Run the notebook to add this region");
+    d3.select("#chart-caption").text("Regional values will appear after the updated extraction runs.");
+    return;
+  }
+  d3.select("#data-status").text("CMIP6 EXTRACTED · REGIONAL DATA")
+    .classed("live-note", true).classed("missing-note", false);
   const scenarios = ["SSP2-4.5", "SSP5-8.5"];
   const seasons = [
     { name: "Winter", abbreviation: "DJF", months: [12, 1, 2] },
