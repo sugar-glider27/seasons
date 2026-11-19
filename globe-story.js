@@ -105,34 +105,41 @@ function drawChart(regionId) {
     if (series.values.some(d => d.models > 1)) svg.append("path").datum(series.values).attr("class", "ribbon").attr("fill", color).attr("d", area);
     svg.append("path").datum(series.values).attr("class", "series-line").attr("stroke", color).attr("d", line);
     svg.selectAll(`.dot-${series.scenario.replaceAll(/[^a-z0-9]/gi, "")}`).data(series.values.filter(d => Number.isFinite(d.median))).join("circle")
-      .attr("class", "series-point").attr("r", 2.8).attr("cx", d => x(d.month)).attr("cy", d => y(d.median)).attr("fill", color);
+      .attr("class", "series-point").attr("r", 2.8).attr("cx", d => x(d.season) + x.bandwidth() / 2).attr("cy", d => y(d.median)).attr("fill", color);
   });
   const modelCount = d3.max(grouped.flatMap(series => series.values.map(d => d.models))) || 0;
   d3.select("#chart-caption").text(modelCount > 1
     ? `Median of ${modelCount} paired model families; shaded bands show their full range.`
-    : "Preview values are illustrative; extracted model spread will appear here.");
+    : "One paired model family; a model range is unavailable.");
 }
 
 async function loadTemperature() {
   const status = d3.select("#data-status");
-  let response;
-  let live = false;
   try {
-    response = await fetch("data/temperature_seasonality.csv", { cache: "no-store" });
+    const response = await fetch("data/temperature_seasonality.csv", { cache: "no-store" });
     if (!response.ok) throw new Error("No extracted temperature CSV yet");
-    live = true;
+    const text = await response.text();
+    const rows = d3.csvParse(text, d => ({
+      ...d,
+      month: +d.month,
+      temperature_c: +d.temperature_c
+    }));
+    if (!rows.length) throw new Error("The extracted temperature CSV is empty");
+    window.temperatureRows = rows;
+    status.text("CMIP6 EXTRACTED · REGIONAL DATA");
+    status.classed("status-note", false).classed("live-note", true);
+    return true;
   } catch (error) {
-    response = await fetch("data/temperature_seasonality_demo.csv");
+    window.temperatureRows = null;
+    status.text("CMIP6 DATA NOT FOUND · RUN THE EXTRACTION NOTEBOOK");
+    status.classed("status-note", false).classed("missing-note", true);
+    const svg = d3.select("#chart");
+    svg.selectAll("*").remove();
+    svg.append("text").attr("class", "chart-title").attr("text-anchor", "middle")
+      .attr("x", 210).attr("y", 155).text("Run the extraction notebook to load data");
+    d3.select("#chart-caption").text("The chart requires data/temperature_seasonality.csv.");
+    return false;
   }
-  const text = await response.text();
-  window.temperatureRows = d3.csvParse(text, d => ({
-    ...d,
-    month: +d.month,
-    temperature_c: +d.temperature_c
-  }));
-  status.text(live ? "CMIP6 EXTRACTED · REGIONAL DATA" : "PREVIEW DATA · ILLUSTRATIVE ONLY");
-  status.classed("preview-note", !live).classed("live-note", live);
-  drawChart("western_na");
 }
 
 d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json").then(world => {
