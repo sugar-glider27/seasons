@@ -182,3 +182,29 @@ window.addEventListener("scroll", scheduleStorySync, { passive: true });
 window.addEventListener("resize", scheduleStorySync);
 scheduleStorySync();
 loadTemperature().then(syncStoryToView);
+
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+function activateTab(tab, moveFocus = false) {
+  tabs.forEach(candidate => {
+    const selected = candidate === tab;
+    candidate.setAttribute("aria-selected", selected ? "true" : "false");
+    candidate.tabIndex = selected ? 0 : -1;
+    document.getElementById(candidate.getAttribute("aria-controls")).hidden = !selected;
+  });
+  if (moveFocus) tab.focus();
+  if (tab.id === "visual-tab") scheduleStorySync();
+}
+
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => activateTab(tab));
+  tab.addEventListener("keydown", event => {
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    activateTab(tabs[nextIndex], true);
+  });
+});

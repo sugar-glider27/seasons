@@ -21,15 +21,21 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; color: var(--ink); background: var(--paper); font-family: Georgia, "Times New Roman", serif; }
-    .masthead {
-      padding: 20px clamp(22px, 6vw, 88px); border-bottom: 1px solid var(--line);
-      display: flex; justify-content: space-between; gap: 20px; color: var(--muted);
-      font: 700 11px/1.2 Arial, sans-serif; letter-spacing: .13em; text-transform: uppercase;
-    }
     .hero { max-width: 940px; padding: 78px 24px 70px; margin: auto; text-align: center; }
     .kicker, .eyebrow { color: #347080; font: 700 11px/1.4 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
     h1 { max-width: 830px; margin: 18px auto; font-size: clamp(42px, 7vw, 80px); font-weight: 500; line-height: .98; letter-spacing: -.04em; }
     .dek { max-width: 680px; margin: 22px auto 0; color: #4d626b; font-size: 20px; line-height: 1.5; }
+    .tab-list { display: flex; gap: 7px; max-width: 1500px; margin: 0 auto; padding: 16px clamp(20px, 5vw, 76px) 0; border-bottom: 1px solid var(--line); }
+    .tab-button { padding: 10px 16px; border: 1px solid transparent; border-bottom: 0; border-radius: 5px 5px 0 0; color: var(--muted); background: transparent; font: 700 12px Arial, sans-serif; cursor: pointer; }
+    .tab-button[aria-selected="true"] { border-color: var(--line); color: var(--ink); background: var(--panel); }
+    .tab-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .tab-panel[hidden] { display: none; }
+    .writeup-panel { min-height: 78vh; max-width: 1000px; margin: 0 auto; padding: 42px 24px 90px; }
+    .writeup-panel h1 { margin: 18px 0 28px; font-size: clamp(36px, 5vw, 58px); }
+    .writeup-content { min-height: 52vh; padding: 28px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); }
+    .writeup-content ol { margin: 0; padding-left: 1.3em; }
+    .writeup-content li { margin: 0 0 24px; padding-left: 8px; color: #4f636a; font-size: 18px; line-height: 1.6; }
+    .writeup-content li:last-child { margin-bottom: 0; }
     .story-layout {
       display: grid; grid-template-columns: minmax(280px, 40%) minmax(440px, 60%);
       gap: clamp(24px, 5vw, 76px); max-width: 1500px; margin: 0 auto;
@@ -81,7 +87,6 @@
       .step:first-child { margin-top: 4vh; }
     }
     @media (max-width: 600px) {
-      .masthead { padding: 14px 18px; }
       .hero { padding: 58px 20px 48px; }
       .dek { font-size: 17px; }
       .story-layout { display: flex; flex-direction: column; padding: 0 14px 50px; }
@@ -98,7 +103,11 @@
   </style>
 </head>
 <body>
-  <header class="masthead"><span>Climate, in context</span><span>CMIP6 · Story prototype</span></header>
+  <nav class="tab-list" role="tablist" aria-label="Project sections">
+    <button id="visual-tab" class="tab-button" type="button" role="tab" aria-selected="true" aria-controls="visual-panel">Visualization</button>
+    <button id="writeup-tab" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="writeup-panel" tabindex="-1">Write-up</button>
+  </nav>
+  <section id="visual-panel" class="tab-panel" role="tabpanel" aria-labelledby="visual-tab" tabindex="0">
   <section class="hero">
     <div class="kicker">A guided look at seasonal warming</div>
     <h1>Is the whole world warming equally?</h1>
@@ -160,7 +169,16 @@
     <p>Seasonal change can be obscured by an annual average. Comparing warming across seasons and regions makes it easier to see when the calendar shifts most, and how much the answer depends on the emissions pathway.</p>
   </section>
   <p class="source-note">Data: CMIP6 monthly near-surface air temperature (tas), averaged over land within broad starter regions. These results compare long-term seasonal averages from four climate models; they are not forecasts for a specific place.</p>
-
+  </section>
+  <section id="writeup-panel" class="tab-panel writeup-panel" role="tabpanel" aria-labelledby="writeup-tab" tabindex="0" hidden>
+    <h1>Write up</h1>
+    <div id="writeup-content" class="writeup-content">
+      <ol>
+        <li><p>So far, we have explored the CMIP6 climate data and created static visualizations to brainstorm different ideas. We decided to focus on how seasonal temperatures change across different locations and years. On our website, we have implemented an interactive globe alongside a line graph comparing temperature changes across the four seasons. As we scroll through the website, the globe automatically shifts between different regions and the graph updates to show how seasonal warming varies at that location. The globe is an important part of our narrative because we plan to make it rotatable, allowing users to select different locations and explore how seasonal warming varies by region.</p></li>
+        <li><p>The most challenging part of our project is integrating the interactive transitions and animations that connect our narrative seasonal elements with the globe’s locations and time of year. This is because our team aims to design background special effects that guide the user through each season, but that requires strong artistic creativity to ensure that it is easy to engage and navigate. If users switch between different environments around the world quickly, our interface and effects both need to be responsive, without noticeable delays. The navigation bars and text annotations should be easily accessible, with tooltips and descriptive features that offer users additional information, such as the areas’ temperature and changes over time.</p></li>
+      </ol>
+    </div>
+  </section>
   <script src="globe-story.js"></script>
 </body>
 </html>
